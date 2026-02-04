@@ -1,38 +1,37 @@
 import { GoogleGenAI } from "@google/genai";
-import readline from "readline-sync"
+import readline from "readline-sync";
 import dotenv from "dotenv";
 dotenv.config();
 
 const ai = new GoogleGenAI({});
 
 async function main() {
-  const query = readline.question("Ask me anything:");
-
   const chat = ai.chats.create({
     model: "gemini-3-flash-preview",
-    history: []
-  }) 
-
-  const response = await chat.sendMessage({
-    message: query,
+    history: [],
   });
-  console.log("Chat response 1:", response.text);
 
-  while(true)
-  { 
+  while (true) {
     const query = readline.question("\nAsk me anything: ");
 
-    if(query.toLowerCase() === "exit" || query.toLowerCase() === "clear")
-    {
-      console.log("Good Bye...!");
+    if (query.toLowerCase() === "exit" || query.toLowerCase() === "clear") {
       break;
     }
 
-    const response = await chat.sendMessage({
-        message: query,
-      });
+    const result = await chat.sendMessageStream({
+      message: query,
+    });
 
-    console.log("\nChat response:", response.text);
+    // ! Error
+    for await (const chunk of result.stream) {
+      // In the newest SDK, chunk.text is often a property or method
+      const chunkText = chunk.text();
+      if (chunkText) {
+        process.stdout.write(chunkText);
+      }
+    }
+
+    console.log("\n");
   }
 }
 
