@@ -1,43 +1,39 @@
 import { GoogleGenAI } from "@google/genai";
+import readline from "readline-sync"
 import dotenv from "dotenv";
 dotenv.config();
 
 const ai = new GoogleGenAI({});
 
-// const history = [
-//     {
-//       role: "user",
-//       parts: [{ text: "what is my name and age?" }],
-//     },
-//     {
-//       role:"model",
-//       parts:[{text:"I don’t know your name or age."}]
-//     },
-//     {
-//       role:"user",
-//       parts:[{text:"my name is Shresth rajput"}]
-//     },
-//     {
-//       role:"model",
-//       parts:[{text:"Nice to meet you, **Shresth Rajput**!"}]
-//     },
-//     {
-//       role:"user",
-//       parts:[{text:"what is my name?"}]
-//     }
-// ]
-
 async function main() {
-  const response = await ai.models.generateContent({
-    model: "gemini-3-flash-preview",
-    contents: "explain what is react usestate hook?",
-    config: {
-      systemInstruction:
-        "You are a food Ordering Website. You only answer questions related to food,near by restaurants, recipes, and nutrition.",
-    },
-  });
+  const query = readline.question("Ask me anything:");
 
-  console.log(response.text);
+  const chat = ai.chats.create({
+    model: "gemini-3-flash-preview",
+    history: []
+  }) 
+
+  const response = await chat.sendMessage({
+    message: query,
+  });
+  console.log("Chat response 1:", response.text);
+
+  while(true)
+  { 
+    const query = readline.question("\nAsk me anything: ");
+
+    if(query.toLowerCase() === "exit" || query.toLowerCase() === "clear")
+    {
+      console.log("Good Bye...!");
+      break;
+    }
+
+    const response = await chat.sendMessage({
+        message: query,
+      });
+
+    console.log("\nChat response:", response.text);
+  }
 }
 
 await main();

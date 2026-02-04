@@ -13,6 +13,7 @@
   "dependencies": {
     "@google/genai": "^1.38.0",
     "dotenv": "^17.2.3",
-    "openai": "^6.17.0"
+    "openai": "^6.17.0",
+    "readline-sync": "^1.4.10"
   }
 }
