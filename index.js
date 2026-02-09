@@ -1,20 +1,28 @@
-import { GoogleGenAI, Type } from "@google/genai";
+import { GoogleGenAI,Type} from "@google/genai";
 import readline from "readline-sync";
 import dotenv from "dotenv";
 dotenv.config();
 
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+const ai = new GoogleGenAI({ });
 
 
 // 2. The Tool Function
 async function weatherInformation({location}) {
-    const url = `http://api.weatherapi.com/v1/current.json?key=ce7051ff107c4605a7371506240404&q=${location}&aqi=no`;
+  const API_KEY = "fd719c57a14153477b575c89d3c70110";
+     const url = `https://api.openweathermap.org/data/2.5/weather?q=${location}&appid=${API_KEY}&units=metric`;  
     const response = await fetch(url);
     const data = await response.json();
-    return data;
+    return   {
+      city: data.name,
+      temperature: data.main.temp,
+      description: data.weather[0].description,
+      humidity: data.main.humidity,
+      windSpeed: data.wind.speed
+    };
 }
-    
+
+
 const weatherInfo = {
   name: "weatherInformation",
   description: "Gets the current temperature for a given location.",
@@ -23,8 +31,8 @@ const weatherInfo = {
     properties: {
       location: {
         type: Type.STRING,
-        description: "Name of the city for which i have to fetch",
-      },
+        description: "Name of the city or state for which i have to fetch",
+      }
     },
     required: ["location"],
   },
@@ -60,14 +68,14 @@ async function runAgent()
             const {name,args} = functionCall;
             console.log(name);
             console.log(args);
-            const response = await  toolFunctions[name](args)
+            const toolResponse  = await  toolFunctions[name](args)
 
-            console.log(response)
+            console.log(toolResponse)
 
             const functionResponsePart = {
               name: functionCall.name,
               response:{
-                result: response
+                result: toolResponse 
               }
             }
 
@@ -97,7 +105,7 @@ async function runAgent()
             parts: [{text: result.text}]
           });
 
-          console.log(response.text)
+          console.log(result.text)
           break;
         }
           
@@ -116,5 +124,5 @@ while (true) {
     parts:[{text:question}]
   });
 
-  await runAgent()
+  await runAgent();
 }
